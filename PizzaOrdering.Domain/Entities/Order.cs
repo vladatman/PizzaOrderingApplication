@@ -9,6 +9,8 @@ public class Order
     public string CustomerPhone { get; set; } = string.Empty;
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public decimal TotalPrice { get; set; }
+    public string? DeliveryAddress { get; set; }
+    public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
 
