@@ -11,5 +11,5 @@ public class PizzaDto
     public decimal SmallPrice { get; set; }
     public decimal MediumPrice { get; set; }
     public decimal LargePrice { get; set; }
-    public List<ToppingDto> DefaultToppings { get; set; } = new();
+    public List<ToppingDto>? DefaultToppings { get; set; }
 } 
