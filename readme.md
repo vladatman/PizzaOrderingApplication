@@ -1,104 +1,233 @@
-Pizza Shop API - Technical Assessment
+# Pizza Ordering Application
 
-## Task Overview
+A RESTful API for pizza ordering built with .NET 9, following Clean Architecture principles and using the MediatR pattern for CQRS implementation.
 
-Build a RESTful API for pizza ordering
+## 🏗️ Architecture
 
-We'll discuss your approach and decisions in a follow-up meeting.
+This application follows **Clean Architecture** principles with the following layers:
 
-## Technical Requirements
+- **Domain**: Core business entities and logic
+- **Application**: Use cases, DTOs, and business rules
+- **Infrastructure**: Data access, external services
+- **API**: Controllers and HTTP endpoints
 
-### Must Use
+### Entity Relationship Diagram
 
-- .NET 9
-- Entity Framework Core with SQLite database
-- MediatR pattern for all business operations
-- Clean Architecture principles
-- DTOs for API communication (no direct entity exposure)
+![Pizza Ordering ERD](pizza-ordering-erd.jpg)
 
-### Getting Started
+*Entity Relationship Diagram showing the database structure with Order, OrderItem, Pizza, Topping, and OrderItemTopping tables and their relationships.*
 
-- Set up your solution structure using Clean Architecture
-- Research MediatR basics: Commands, Queries, and Handlers
-- Use Code-First approach with EF Core migrations
-- Implement proper data seeding
+## 🚀 Getting Started
 
-## Core Features
+### Prerequisites
 
-### Pizza Menu System
+- .NET 9 SDK
+- Visual Studio 2022 or VS Code
+- SQLite (included with EF Core)
 
-- List available pizzas with filtering options
-- Get detailed pizza information
-- Support for different pizza sizes and pricing
+### Installation
 
-### Topping Management
+1. **Clone the repository**
+   
+   ```bash
+   git clone https://github.com/vladatman/PizzaOrderingApplication.git
+   cd PizzaOrderingApplication
+   ```
 
-- Pizzas have default toppings (included in base price)
-- Customers can add extra toppings (additional cost)
-- Track topping availability
+2. **Restore dependencies**
+   
+   ```bash
+   dotnet restore
+   ```
 
-### Order Processing
+3. **Run database migrations**
+   
+   ```bash
+   cd PizzaOrdering.API
+   dotnet ef database update
+   ```
 
-- Create orders with custom pizza configurations
-- Calculate accurate pricing including size and extra toppings
-- Order status tracking
-- View order details
+4. **Start the application**
+   
+   ```bash
+   dotnet run
+   ```
 
-## Domain Requirements
+The API will be available at `https://localhost:7001` (or the port shown in the console).
 
-Design entities to support:
+## 📋 Features
 
-- Pizzas with different sizes and default toppings
-- Available toppings with individual pricing
-- Orders containing multiple pizza items
-- Many-to-many relationships where appropriate
+### ✅ Implemented Features
 
-## API Endpoints
+- **Pizza Management**
+  
+  - List all pizzas with filtering by max price
+  - Get pizza details with default toppings
+  - Filter pizzas by specific toppings
 
-Design RESTful endpoints for:
+- **Topping Management**
+  
+  - List all available toppings
+  - Get topping details
+  - Track topping availability
 
-- Pizza catalog browsing
-- Topping selection
-- Order creation and retrieval
-- Order status management
+- **Order Management**
+  
+  - Create new orders with multiple items
+  - View order details and history
+  - Update order status
+  - Search orders by customer name
 
-## Sample Data
+- **Pricing System**
+  
+  - Size-based pricing multipliers
+  - Default toppings included in base price
+  - Extra toppings add to total cost
+  - Automatic price calculations
 
-Your seeded data should include:
+## 🔌 API Endpoints
 
-- At least 3 different pizzas with varying base prices by size
-- At least 6 toppings with different prices
-- Logical default topping assignments
+### Pizzas
 
-## DTO Example
+| Method | Endpoint                         | Description                                              |
+| ------ | -------------------------------- | -------------------------------------------------------- |
+| GET    | `/api/pizzas`                    | Get all pizzas (filter by `maxPrice`)                    |
+| GET    | `/api/pizzas/{id}`               | Get pizza by ID                                          |
+| GET    | `/api/pizzas/with-toppings`      | Get pizzas with default toppings (filter by `toppingId`) |
+| GET    | `/api/pizzas/{id}/with-toppings` | Get pizza with default toppings by ID                    |
 
-```csharp
-public class CreateOrderDto
+### Toppings
+
+| Method | Endpoint             | Description       |
+| ------ | -------------------- | ----------------- |
+| GET    | `/api/toppings`      | Get all toppings  |
+| GET    | `/api/toppings/{id}` | Get topping by ID |
+
+### Orders
+
+| Method | Endpoint                                 | Description                 |
+| ------ | ---------------------------------------- | --------------------------- |
+| GET    | `/api/orders`                            | Get all orders              |
+| GET    | `/api/orders/{id}`                       | Get order by ID             |
+| GET    | `/api/orders/by-customer/{customerName}` | Get orders by customer name |
+| POST   | `/api/orders`                            | Create new order            |
+| PUT    | `/api/orders/{id}/status`                | Update order status         |
+
+## 📝 Request/Response Examples
+
+### Create Order
+
+**Request:**
+
+```json
+POST /api/orders
 {
-    public string CustomerName { get; set; }
-    public string CustomerPhone { get; set; }
-    public List<OrderItemDto> Items { get; set; }
+  "customerName": "John Doe",
+  "customerPhone": "+1234567890",
+  "items": [
+    {
+      "pizzaId": 1,
+      "size": "Large",
+      "quantity": 2,
+      "extraToppingIds": [3, 5]
+    }
+  ]
 }
 ```
 
-## Business Rules
+**Response:**
 
-- Pizza pricing varies by size (implement size-based multipliers)
-- Default toppings are included in base price
-- Extra toppings add to the total cost
-- Orders should have status tracking capability
+```json
+{
+  "id": 1,
+  "customerName": "John Doe",
+  "customerPhone": "+1234567890",
+  "status": "Pending",
+  "totalPrice": 28.50,
+  "createdAt": "2024-01-15T10:30:00Z",
+  "items": [
+    {
+      "id": 1,
+      "pizzaName": "Margherita",
+      "size": "Large",
+      "quantity": 2,
+      "unitPrice": 14.25,
+      "extraToppings": [
+        { "id": 3, "name": "Mushrooms", "price": 1.50 },
+        { "id": 5, "name": "Olives", "price": 1.00 }
+      ]
+    }
+  ]
+}
+```
 
-## Deliverables
+## 🗄️ Database Schema
 
-1. complete solution that runs with `dotnet run`
-2. SQLite database with proper migrations and seeding
-3. README with setup instructions
-4. Brief explanation of your architectural decisions
+The application uses **SQLite** with the following key entities:
 
+- **Order**: Customer information, status, pricing, timestamps
+- **OrderItem**: Individual pizza items within orders
+- **Pizza**: Available pizzas with base pricing
+- **Topping**: Available toppings with individual pricing
+- **OrderItemTopping**: Junction table for extra toppings
 
-**Focus on:** Clean code, proper separation of concerns, and demonstrating your understanding of the required patterns. Completing all features is less important than showing good coding practices and architectural thinking.
+### Sample Data
+
+The database is seeded with:
+
+- **3 Pizzas**: Margherita, Pepperoni, Hawaiian
+- **6 Toppings**: Mushrooms, Olives, Peppers, Sausage, Bacon, Pineapple
+- **Size Multipliers**: Small (1.0x), Medium (1.45x), Large (1.89x)
+
+## 🏛️ Technical Decisions
+
+### Architecture Patterns
+
+- **Clean Architecture**: Separation of concerns across layers
+- **CQRS with MediatR**: Commands for writes, Queries for reads
+- **Repository Pattern**: Data access abstraction
+
+### Key Technologies
+
+- **.NET 9**: Latest framework version
+- **Entity Framework Core**: ORM with Code-First approach
+- **SQLite**: Lightweight, file-based database
+- **MediatR**: Mediator pattern implementation
+- **AutoMapper**: Object-to-object mapping
+
+### JSON Configuration
+
+- **Null values ignored**: Clean API responses
+- **Enums as strings**: Readable status values
+- **Proper HTTP status codes**: RESTful error handling
+
+## 📁 Project Structure
+
+```
+PizzaOrderingApplication/
+├── PizzaOrdering.API/           # Web API layer
+│   ├── Controllers/             # HTTP endpoints
+│   ├── Program.cs              # Application startup
+│   └── appsettings.json        # Configuration
+├── PizzaOrdering.Application/   # Business logic layer
+│   ├── Commands/               # Write operations
+│   ├── Queries/                # Read operations
+│   ├── Handlers/               # Command/Query handlers
+│   ├── DTOs/                   # Data transfer objects
+│   └── Interfaces/             # Service contracts
+├── PizzaOrdering.Domain/        # Core business entities
+│   ├── Entities/               # Domain models
+│   ├── Enums/                  # Business enums
+│   └── Constants/              # Business constants
+└── PizzaOrdering.Infrastructure/ # Data access layer
+    ├── Data/                   # DbContext and seeding
+    ├── Repositories/           # Data access implementations
+    ├── Services/               # Business service implementations
+    └── Migrations/             # EF Core migrations
+```
 
 ---
 
-if there is any questions you can reach me at: 
-+31 6 371 95 387
+**Built with ❤️ using .NET 9 and Clean Architecture principles**
+
+
